@@ -9,7 +9,7 @@
             <Button Text="Go" Clicked="btnSearch_Clicked"/>
             <Button Text="Advanced" Clicked="btnAdvancedSearch_Clicked"/>
         </StackLayout>
-        <ListView x:Name="animeListView">
+        <ListView x:Name="animeListView" ItemSelected="animeListView_ItemSelected">
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <ViewCell>
