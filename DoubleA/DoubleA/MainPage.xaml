@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="DoubleA.MainPage">
+
+    <StackLayout>
+        <Entry Placeholder="Search" x:Name="searchBar"/>
+        <StackLayout Orientation="Horizontal">
+            <Button Text="Go" Clicked="btnSearch_Clicked"/>
+            <Button Text="Advanced" Clicked="btnAdvancedSearch_Clicked"/>
+        </StackLayout>
+        <ListView x:Name="animeListView">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <ViewCell>
+                        <StackLayout>
+                            <Label Text="{Binding Title}"/>
+                            <Label Text="{Binding Score}"/>
+                            <Label Text="{Binding EpisodeCount}"/>
+                            <Label Text="{Binding StartEndDate}"/>
+                        </StackLayout>
+                    </ViewCell>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+        <StackLayout Orientation="Horizontal">
+            <Button Text="MAL Login" Clicked="btnMALLogin_Clicked"/>
+            <Button Text="AniList Login" Clicked="btnAnilistLogin_Clicked"/>
+            <Button Text="Settings" Clicked="btnSettings_Clicked"/>
+        </StackLayout>
+    </StackLayout>
+
+</ContentPage>
