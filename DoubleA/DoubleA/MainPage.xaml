@@ -14,10 +14,14 @@
                 <DataTemplate>
                     <ViewCell>
                         <StackLayout>
-                            <Label Text="{Binding Title}"/>
-                            <Label Text="{Binding Score}"/>
-                            <Label Text="{Binding EpisodeCount}"/>
-                            <Label Text="{Binding StartEndDate}"/>
+                            <StackLayout Orientation="Horizontal">
+                                <Label Text="{Binding Title}"/>
+                                <Label Text="{Binding Score}"/>
+                            </StackLayout>
+                            <StackLayout Orientation="Horizontal">
+                                <Label Text="{Binding EpisodeCount}"/>
+                                <Label Text="{Binding StartEndDate}"/>
+                            </StackLayout>
                         </StackLayout>
                     </ViewCell>
                 </DataTemplate>

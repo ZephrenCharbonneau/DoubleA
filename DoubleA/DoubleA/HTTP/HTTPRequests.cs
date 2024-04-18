@@ -36,18 +36,15 @@ namespace DoubleA.HTTP
             return await response.Content.ReadAsStringAsync();
         }
 
-        public static async Task<string> Test()
+        public static async Task<string> SendAnilistPostRequestAsync(string graphQLQueryText, Dictionary<string, object> vars)
         {
             GraphQLQuery query = new GraphQLQuery
             {
-                query = "query ($id: Int) {\nMedia (id: $id, type: ANIME) {\nid\ntitle {\nromaji\nenglish\nnative\n}\n}\n}",
-                variables = new Dictionary<string, object>()
-                {
-                    { "id", 15125 }
-                }
+                query = graphQLQueryText.Replace("{", "{\n").Replace("}", "}\n").Replace(',', '\n'),
+                variables = vars
             };
             JsonContent content = JsonContent.Create(query);
-            content.Headers.Add("Access", "application-json");
+            // content.Headers.Add("Access", "application-json");
             HttpResponseMessage response = await httpClient.PostAsync("https://graphql.anilist.co", content);
             return await response.Content.ReadAsStringAsync();
         }

@@ -33,6 +33,52 @@ namespace DoubleA.Models
 
             return toReturn;
         }
+
+        private static readonly String[] months = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+
+        public static Anime CreateFromAnilistJsonElement(JsonElement node)
+        {
+            Anime toReturn = new Anime();
+            toReturn.Id = node.GetProperty("id").GetInt32();
+            toReturn.Title = node.GetProperty("title").GetProperty("romaji").GetString();
+            toReturn.Score = node.GetProperty("meanScore").GetInt32().ToString() + "/100";
+            Console.WriteLine(toReturn.Title);
+
+            StringBuilder animeStringBuilder = new StringBuilder();
+            animeStringBuilder.Append(node.GetProperty("format").GetString());
+            JsonElement episodes = node.GetProperty("episodes");
+
+            if (episodes.ValueKind != JsonValueKind.Null)
+            {
+                int episodeNumber = episodes.GetInt32();
+                animeStringBuilder.Append(", ").Append(episodeNumber).Append(episodeNumber != 1 ? " episodes" : " episode");
+            }
+
+            toReturn.EpisodeCount = animeStringBuilder.ToString();
+
+            animeStringBuilder.Length = 0;
+            JsonElement dateComponent;
+
+            dateComponent = node.GetProperty("startDate").GetProperty("month");
+            if (dateComponent.ValueKind != JsonValueKind.Null) 
+                animeStringBuilder.Append(months[dateComponent.GetInt32() - 1]);
+
+            dateComponent = node.GetProperty("startDate").GetProperty("year");
+            if (dateComponent.ValueKind != JsonValueKind.Null)
+                animeStringBuilder.Append(" ").Append(dateComponent.GetInt32());
+
+            dateComponent = node.GetProperty("endDate").GetProperty("month");
+            if (dateComponent.ValueKind != JsonValueKind.Null)
+                animeStringBuilder.Append(" - ").Append(months[dateComponent.GetInt32() - 1]);
+
+            dateComponent = node.GetProperty("endDate").GetProperty("year");
+            if (dateComponent.ValueKind != JsonValueKind.Null)
+                animeStringBuilder.Append(" ").Append(dateComponent.GetInt32());
+
+            toReturn.StartEndDate = animeStringBuilder.ToString();
+
+            return toReturn;
+        }
     }
 
     public class AnimeDetailed : Anime
