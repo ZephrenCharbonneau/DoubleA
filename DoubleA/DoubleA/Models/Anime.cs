@@ -126,7 +126,7 @@ namespace DoubleA.Models
 
             animeStringBuilder.Length = 0;
             foreach (JsonElement genre in node.GetProperty("genres").EnumerateArray())
-                animeStringBuilder.Append(genre.GetString()).Append(", ");
+                animeStringBuilder.Append(genre.GetProperty("name").GetString()).Append(", ");
             animeStringBuilder.Length -= 2;
             toReturn.Genres = animeStringBuilder.ToString();
 

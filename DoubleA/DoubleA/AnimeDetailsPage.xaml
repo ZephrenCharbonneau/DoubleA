@@ -8,6 +8,10 @@
                 VerticalOptions="CenterAndExpand" 
                 HorizontalOptions="CenterAndExpand"
                 x:Name="lblAnimeTitle" />
+            <StackLayout Orientation="Horizontal">
+                <Button Text="+" x:Name="btnAddEp" Clicked="btnAddEp_Clicked"/>
+                <Label Text="[PROGRESS]" x:Name="lblProgress"/>
+            </StackLayout>
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>

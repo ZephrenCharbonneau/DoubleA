@@ -54,6 +54,16 @@ namespace DoubleA.HTTP
             return await response.Content.ReadAsStringAsync();
         }
 
+        public static async Task<string> SendMALPatchRequestWithAuthAsync(string url, Dictionary<string, string> properties)
+        {
+            HttpRequestMessage patchRequest = new HttpRequestMessage(HttpMethod.Put, url);
+            patchRequest.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", 
+                OAuthAccessTokens.MalAccessToken);
+            patchRequest.Content = new FormUrlEncodedContent(properties);
+            HttpResponseMessage response = await httpClient.SendAsync(patchRequest);
+            return await response.Content.ReadAsStringAsync();
+        }
+
         public static async Task<string> SendAnilistPostRequestAsync(string graphQLQueryText, Dictionary<string, object> vars)
         {
             GraphQLQuery query = new GraphQLQuery
@@ -75,8 +85,10 @@ namespace DoubleA.HTTP
                 variables = vars
             };
             HttpRequestMessage postRequest = new HttpRequestMessage(HttpMethod.Post, "https://graphql.anilist.co");
+            Console.WriteLine("PRENULL");
             postRequest.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer",
                 OAuthAccessTokens.AnilistAccessToken);
+            Console.WriteLine("POSTNULL");
             postRequest.Content = JsonContent.Create(query);
             HttpResponseMessage response = await httpClient.SendAsync(postRequest);
             return await response.Content.ReadAsStringAsync();

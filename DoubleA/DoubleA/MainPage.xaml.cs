@@ -40,7 +40,8 @@ namespace DoubleA
 
         private async void PopulateAnimeList()
         {
-            if (userSettings.DefaultListSource == "MAL")
+            if ((OAuthAccessTokens.MalAccessToken != null && OAuthAccessTokens.AnilistAccessToken == null) ||
+                userSettings.DefaultListSource == "MAL")
             {
                 Dictionary<string, string> requestParams = new Dictionary<string, string>();
                 requestParams.Add("ranking_type", "all");
@@ -57,7 +58,8 @@ namespace DoubleA
                     animeList.Add(Anime.CreateFromMALJsonElement(element.GetProperty("node")));
                 }
             }
-            else if (userSettings.DefaultListSource == "Anilist")
+            else if ((OAuthAccessTokens.MalAccessToken == null && OAuthAccessTokens.AnilistAccessToken != null) ||
+                userSettings.DefaultListSource == "Anilist")
             {
                 string queryText = "query { Page { media (type: ANIME, sort: SCORE_DESC) { id,title { romaji },format,startDate {year,month},endDate {year,month},episodes,meanScore}}}";
                 string response = await HTTPRequests.SendAnilistPostRequestAsync(queryText, new Dictionary<string, object>());
@@ -76,7 +78,8 @@ namespace DoubleA
         {
             animeList.Clear();
 
-            if (userSettings.DefaultListSource == "MAL")
+            if ((OAuthAccessTokens.MalAccessToken != null && OAuthAccessTokens.AnilistAccessToken == null) ||
+                userSettings.DefaultListSource == "MAL")
             {
                 Dictionary<string, string> requestParams = new Dictionary<string, string>();
                 requestParams.Add("q", searchBar.Text);
@@ -98,7 +101,8 @@ namespace DoubleA
                     Console.WriteLine("p3");
                 }
             }
-            else if (userSettings.DefaultListSource == "Anilist")
+            else if ((OAuthAccessTokens.MalAccessToken == null && OAuthAccessTokens.AnilistAccessToken != null) ||
+                userSettings.DefaultListSource == "Anilist")
             {
                 string queryText = "query { Page { media (type: ANIME, sort: SCORE_DESC, search: \"" + searchBar.Text + "\") { id,title { romaji },format,startDate {year,month},endDate {year,month},episodes,meanScore}}}";
                 string response = await HTTPRequests.SendAnilistPostRequestAsync(queryText, new Dictionary<string, object>());
@@ -140,8 +144,10 @@ namespace DoubleA
             Anime selectedAnime = animeListView.SelectedItem as Anime;
             int selectedAnimeId = selectedAnime.Id;
 
-            if (userSettings.DefaultListSource == "MAL")
+            if ((OAuthAccessTokens.MalAccessToken != null && OAuthAccessTokens.AnilistAccessToken == null) || 
+                userSettings.DefaultListSource == "MAL")
             {
+                Console.WriteLine("IS THIS RUNNING");
                 Dictionary<string, string> requestParams = new Dictionary<string, string>();
                 requestParams.Add("fields", "mean,start_date,end_date,media_type,num_episodes,synopsis,average_episode_duration," +
                     "source,genres,alternative_titles,num_list_users");
@@ -152,9 +158,10 @@ namespace DoubleA
 
                 JsonDocument jsonResponse = JsonDocument.Parse(response);
                 AnimeDetailed detailed = AnimeDetailed.CreateFromMALJsonElement(jsonResponse.RootElement);
-                await Navigation.PushAsync(new AnimeDetailsPage(detailed));
+                await Navigation.PushAsync(new AnimeDetailsPage(detailed, userSettings));
             }
-            else if (userSettings.DefaultListSource == "Anilist")
+            else if ((OAuthAccessTokens.MalAccessToken == null && OAuthAccessTokens.AnilistAccessToken != null) || 
+                userSettings.DefaultListSource == "Anilist")
             {
                 string queryText = "query { Media (type: ANIME, id: " + selectedAnimeId + ") { id,title { romaji },format,startDate " +
                     "{year,month},endDate {year,month},episodes,meanScore,description,duration,source,genres,synonyms,popularity}}";
@@ -165,7 +172,7 @@ namespace DoubleA
                 JsonDocument jsonResponse = JsonDocument.Parse(response);
                 JsonElement mediaElement = jsonResponse.RootElement.GetProperty("data").GetProperty("Media");
                 AnimeDetailed detailed = AnimeDetailed.CreateFromAnilistJsonElement(mediaElement);
-                await Navigation.PushAsync(new AnimeDetailsPage(detailed));
+                await Navigation.PushAsync(new AnimeDetailsPage(detailed, userSettings));
             }
         }
     }
