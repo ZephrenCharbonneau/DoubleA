@@ -36,6 +36,24 @@ namespace DoubleA.HTTP
             return await response.Content.ReadAsStringAsync();
         }
 
+        public static async Task<string> SendMALGetRequestWithAuthAsync(string url, Dictionary<string, string> properties)
+        {
+            StringBuilder fullUrlBuilder = new StringBuilder(url);
+            fullUrlBuilder.Append("?");
+
+            foreach (KeyValuePair<string, string> kvp in properties)
+            {
+                fullUrlBuilder.Append(kvp.Key).Append("=").Append(kvp.Value).Append("&");
+            }
+
+            fullUrlBuilder.Length--;
+            Console.WriteLine(fullUrlBuilder.ToString());
+            HttpRequestMessage getRequest = new HttpRequestMessage(HttpMethod.Get, fullUrlBuilder.ToString());
+            getRequest.Headers.Add("Authorization", "Bearer " + OAuthAccessTokens.MalAccessToken);
+            HttpResponseMessage response = await httpClient.SendAsync(getRequest);
+            return await response.Content.ReadAsStringAsync();
+        }
+
         public static async Task<string> SendAnilistPostRequestAsync(string graphQLQueryText, Dictionary<string, object> vars)
         {
             GraphQLQuery query = new GraphQLQuery
@@ -46,6 +64,21 @@ namespace DoubleA.HTTP
             JsonContent content = JsonContent.Create(query);
             // content.Headers.Add("Access", "application-json");
             HttpResponseMessage response = await httpClient.PostAsync("https://graphql.anilist.co", content);
+            return await response.Content.ReadAsStringAsync();
+        }
+
+        public static async Task<string> SendAnilistPostRequestAsyncWithAuth(string graphQLQueryText, Dictionary<string, object> vars)
+        {
+            GraphQLQuery query = new GraphQLQuery
+            {
+                query = graphQLQueryText.Replace("{", "{\n").Replace("}", "}\n").Replace(',', '\n'),
+                variables = vars
+            };
+            HttpRequestMessage postRequest = new HttpRequestMessage(HttpMethod.Post, "https://graphql.anilist.co");
+            postRequest.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer",
+                OAuthAccessTokens.AnilistAccessToken);
+            postRequest.Content = JsonContent.Create(query);
+            HttpResponseMessage response = await httpClient.SendAsync(postRequest);
             return await response.Content.ReadAsStringAsync();
         }
     }

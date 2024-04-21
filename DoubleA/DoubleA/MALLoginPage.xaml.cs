@@ -9,6 +9,7 @@ using System.Text.Json;
 
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
+using DoubleA.Models;
 
 namespace DoubleA
 {
@@ -49,6 +50,18 @@ namespace DoubleA
 				JsonDocument authorizationJson = JsonDocument.Parse(authorizationResult);
 				OAuthAccessTokens.MalAccessToken = authorizationJson.RootElement.GetProperty("access_token").GetString();
 				OAuthAccessTokens.MalRefreshToken = authorizationJson.RootElement.GetProperty("refresh_token").GetString();
+
+				Dictionary<string, string> animeListRequestContent = new Dictionary<string, string>();
+				animeListRequestContent.Add("fields", "num_episodes,list_status{num_episodes_watched}");
+				animeListRequestContent.Add("limit", "1000");
+				string userAnimeList = await HTTPRequests.SendMALGetRequestWithAuthAsync("https://api.myanimelist.net/v2/users/@me/animelist",
+					animeListRequestContent);
+
+				JsonDocument animeListJson = JsonDocument.Parse(userAnimeList);
+				List<AnimeListEntry> animeList = new List<AnimeListEntry>();
+				foreach (JsonElement listEntry in animeListJson.RootElement.GetProperty("data").EnumerateArray())
+					animeList.Add(AnimeListEntry.CreateFromMALJsonElement(listEntry));
+				OAuthAccessTokens.MalAnimeList = animeList;
 
 				await DisplayAlert("Success", "You have successfully logged into MyAnimeList", "OK");
                 await Navigation.PopAsync();

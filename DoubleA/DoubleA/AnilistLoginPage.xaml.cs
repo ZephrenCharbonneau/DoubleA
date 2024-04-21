@@ -1,4 +1,5 @@
 ﻿using DoubleA.HTTP;
+using DoubleA.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -51,6 +52,45 @@ namespace DoubleA
                 JsonDocument authorizationJson = JsonDocument.Parse(authorizationResult);
                 OAuthAccessTokens.AnilistAccessToken = authorizationJson.RootElement.GetProperty("access_token").GetString();
                 OAuthAccessTokens.AnilistRefreshToken = authorizationJson.RootElement.GetProperty("refresh_token").GetString();
+
+                string userIdRequest = await HTTPRequests.SendAnilistPostRequestAsyncWithAuth("query {Viewer {id}}",
+                    new Dictionary<string, object>());
+                JsonDocument userIdJson = JsonDocument.Parse(userIdRequest);
+                OAuthAccessTokens.AnilistUserId = userIdJson.RootElement.GetProperty("data").GetProperty("Viewer")
+                    .GetProperty("id").GetInt32();
+
+                Dictionary<string, object> variables = new Dictionary<string, object>();
+                variables.Add("userId", OAuthAccessTokens.AnilistUserId);
+                variables.Add("page", 1);
+                string userListRequest = await HTTPRequests.SendAnilistPostRequestAsyncWithAuth
+                    ("query($userId: Int, $page: Int) {Page (page: $page, perPage: 50) {mediaList(userId: $userId) {mediaId,progress," +
+                    "status,media{title {romaji},episodes,idMal}} pageInfo {currentPage,hasNextPage}}}", variables);
+                Console.WriteLine(userListRequest);
+                bool hasNextPage = true;
+                JsonDocument userListJson;
+                List<AnimeListEntry> userAnimeList = new List<AnimeListEntry>();
+
+                do
+                {
+                    userListJson = JsonDocument.Parse(userListRequest);
+
+                    JsonElement pageNode = userListJson.RootElement.GetProperty("data").GetProperty("Page");
+                    foreach (JsonElement node in pageNode.GetProperty("mediaList").EnumerateArray())
+                        userAnimeList.Add(AnimeListEntry.CreateFromAnilistJsonElement(node));
+
+                    if (pageNode.GetProperty("pageInfo").GetProperty("hasNextPage").GetBoolean())
+                    {
+                        int page = (int)variables["page"];
+                        variables["page"] = page + 1;
+                        userListRequest = await HTTPRequests.SendAnilistPostRequestAsyncWithAuth
+                            ("query($userId: Int, $page: Int) {Page (page: $page, perPage: 50) {mediaList(userId: $userId) {mediaId," +
+                            "progress,status,media{title {romaji},episodes,idMal}} pageInfo {currentPage,hasNextPage}}}", variables);
+                    }
+                    else
+                        hasNextPage = false;
+                } while (hasNextPage);
+
+                OAuthAccessTokens.AnilistAnimeList = userAnimeList;
 
                 await DisplayAlert("Success", "You have successfully logged into Anilist", "OK");
                 await Navigation.PopAsync();

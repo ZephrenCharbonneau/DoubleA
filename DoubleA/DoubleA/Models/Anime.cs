@@ -183,6 +183,62 @@ namespace DoubleA.Models
 
             toReturn.StartEndDate = animeStringBuilder.ToString();
 
+            JsonElement description = node.GetProperty("description");
+            if (description.ValueKind != JsonValueKind.Null)
+                toReturn.Description = description.ToString();
+
+            JsonElement duration = node.GetProperty("duration");
+            if (duration.ValueKind != JsonValueKind.Null)
+                toReturn.EpisodeDuration = duration.GetInt32().ToString() + " minutes";
+
+            JsonElement source = node.GetProperty("source");
+            if (source.ValueKind != JsonValueKind.Null)
+                toReturn.AdaptationSource = source.GetString();
+
+            animeStringBuilder.Length = 0;
+            JsonElement genres = node.GetProperty("genres");
+            if (genres.ValueKind != JsonValueKind.Null)
+            {
+                foreach (JsonElement genre in genres.EnumerateArray())
+                    animeStringBuilder.Append(genre.GetString()).Append(", ");
+                animeStringBuilder.Length -= 2;
+                toReturn.Genres = animeStringBuilder.ToString();
+            }
+
+            return toReturn;
+        }
+    }
+
+    public class AnimeListEntry
+    {
+        public int Id { get; set; }
+        public int IdMal { get; set; }
+        public string Title { get; set; }
+        public int EpisodesSeen { get; set; }
+        public int NumberOfEpisodes { get; set; }
+        public string Status { get; set; }
+
+        public static AnimeListEntry CreateFromMALJsonElement(JsonElement node)
+        {
+            AnimeListEntry toReturn = new AnimeListEntry();
+            toReturn.Id = node.GetProperty("node").GetProperty("id").GetInt32();
+            toReturn.IdMal = toReturn.Id;
+            toReturn.Title = node.GetProperty("node").GetProperty("title").GetString();
+            toReturn.EpisodesSeen = node.GetProperty("list_status").GetProperty("num_episodes_watched").GetInt32();
+            toReturn.NumberOfEpisodes = node.GetProperty("node").GetProperty("num_episodes").GetInt32();
+            toReturn.Status = node.GetProperty("list_status").GetProperty("status").GetString();
+            return toReturn;
+        }
+
+        public static AnimeListEntry CreateFromAnilistJsonElement(JsonElement node)
+        {
+            AnimeListEntry toReturn = new AnimeListEntry();
+            toReturn.Id = node.GetProperty("mediaId").GetInt32();
+            toReturn.IdMal = node.GetProperty("media").GetProperty("idMal").GetInt32();
+            toReturn.Title = node.GetProperty("media").GetProperty("title").GetProperty("romaji").GetString();
+            toReturn.EpisodesSeen = node.GetProperty("progress").GetInt32();
+            toReturn.NumberOfEpisodes = node.GetProperty("media").GetProperty("episodes").GetInt32();
+            toReturn.Status = node.GetProperty("status").GetString();
             return toReturn;
         }
     }

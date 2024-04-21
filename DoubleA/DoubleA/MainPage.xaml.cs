@@ -117,7 +117,7 @@ namespace DoubleA
 
         private void btnAdvancedSearch_Clicked(object sender, EventArgs e)
         {
-
+            searchBar.Text = OAuthAccessTokens.MalAnimeList.Count.ToString();
         }
 
         private async void btnMALLogin_Clicked(object sender, EventArgs e)
